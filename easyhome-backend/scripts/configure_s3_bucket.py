@@ -11,7 +11,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(BASE_DIR))
 
 from app.core.config import settings
-import boto3
+try:
+    import boto3
+    from botocore.exceptions import ClientError
+except ImportError:
+    boto3 = None
+    ClientError = Exception
 
 
 def configure_bucket_policy():
@@ -25,6 +30,15 @@ def configure_bucket_policy():
     
     print(f"\n📦 Bucket: {bucket_name}")
     print(f"🌍 Región: {settings.S3_REGION}")
+
+    # Si boto3 no está instalado o AWS no está configurado, no hacemos nada.
+    if boto3 is None:
+        print("⚠️ boto3 no está instalado. Este script se usa solo cuando se trabaja con AWS.")
+        return
+
+    if not (settings.AWS_ACCESS_KEY_ID and settings.AWS_SECRET_ACCESS_KEY and settings.S3_BUCKET_NAME):
+        print("⚠️ Falta configuración de AWS en .env (AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY/S3_BUCKET_NAME).")
+        return
     
     # Crear cliente S3
     s3_client = boto3.client(

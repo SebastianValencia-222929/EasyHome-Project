@@ -1,5 +1,5 @@
 import { BrowserRouter } from 'react-router-dom'
-import { useAuth } from 'react-oidc-context'
+import { useAuth } from './contexts/AuthContext'
 import Layout from './components/layout/Layout'
 import AppRoutes from './components/routes/AppRoutes'
 import { useCognitoSync } from './hooks/useCognitoSync'
@@ -10,7 +10,7 @@ function App() {
   // Sincronizar usuario con la base de datos cuando inicie sesión
   useCognitoSync();
 
-  if (auth.isLoading) {
+  if (auth.loading) {
     return (
       <div style={{ 
         display: 'flex', 

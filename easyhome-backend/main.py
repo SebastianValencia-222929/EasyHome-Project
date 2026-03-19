@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from app.core.config import settings, BASE_DIR
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
@@ -9,6 +11,13 @@ app = FastAPI(
     title="EasyHome Backend API",
     description="API for managing EasyHome smart home devices and services.",
     version="1.0.0"
+)
+
+# Servir archivos subidos localmente (simula el comportamiento de S3)
+app.mount(
+    settings.LOCAL_UPLOAD_URL_PREFIX,
+    StaticFiles(directory=str(BASE_DIR / settings.LOCAL_UPLOAD_DIR)),
+    name="uploads",
 )
 
 # Configurar CORS para permitir peticiones desde el frontend

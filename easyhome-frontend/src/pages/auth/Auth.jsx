@@ -1,19 +1,51 @@
 import { useState } from 'react';
-import { useAuth } from 'react-oidc-context';
+import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const auth = useAuth();
   const navigate = useNavigate();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState(null);
 
   const handleGoogleLogin = async () => {
     try {
-      await auth.signinRedirect();
+      await auth.loginWithGoogle();
+        navigate('/');
     } catch (error) {
       console.error('Error al iniciar sesión con Google:', error);
     }
   };
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setError(null);
+
+      if (!email || !password) {
+        setError('Ingresa email y contraseña.');
+        return;
+      }
+
+      if (!isLogin && password !== confirmPassword) {
+        setError('Las contraseñas no coinciden.');
+        return;
+      }
+
+      try {
+        if (isLogin) {
+          await auth.login(email, password);
+        } else {
+          await auth.register({ email, password });
+        }
+        navigate('/');
+      } catch (err) {
+        setError('Error al iniciar sesión.');
+        console.error(err);
+      }
+    };
 
   return (
     <div style={{ 
@@ -65,6 +97,8 @@ function Auth() {
         <input
           type="email"
           placeholder="Correo electrónico"
+           value={email}
+           onChange={(e) => setEmail(e.target.value)}
           style={{
             padding: '10px',
             border: '1px solid #ddd',
@@ -76,6 +110,8 @@ function Auth() {
         <input
           type="password"
           placeholder="Contraseña"
+           value={password}
+           onChange={(e) => setPassword(e.target.value)}
           style={{
             padding: '10px',
             border: '1px solid #ddd',
@@ -88,6 +124,8 @@ function Auth() {
           <input
             type="password"
             placeholder="Confirmar contraseña"
+             value={confirmPassword}
+             onChange={(e) => setConfirmPassword(e.target.value)}
             style={{
               padding: '10px',
               border: '1px solid #ddd',
@@ -96,6 +134,10 @@ function Auth() {
             }}
           />
         )}
+
+          {error && (
+            <div style={{ color: 'red', fontSize: '14px' }}>{error}</div>
+          )}
 
         <button
           type="submit"

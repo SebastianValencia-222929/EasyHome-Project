@@ -51,11 +51,10 @@ def sync_cognito_user(user_data: CognitoUserSync, db: Session = Depends(get_db))
         username=user_data.email,
         current_groups=user_data.cognito_groups
     )
-    
-    if groups_assigned and not user_data.cognito_groups:
-        user_data.cognito_groups = [cognito_service.client and 
-                                     cognito_service.get_user_groups(user_data.email) or 
-                                     ["Clientes"]]
+
+    if groups_assigned and (not user_data.cognito_groups or len(user_data.cognito_groups) == 0):
+        # Si no se especificaron grupos, usamos el grupo por defecto.
+        user_data.cognito_groups = cognito_service.get_user_groups(user_data.email)
         logger.info(f"Usuario {user_data.email} asignado al grupo por defecto")
 
     if existing_user:

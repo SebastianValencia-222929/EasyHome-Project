@@ -1,25 +1,19 @@
 import '../../assets/styles/Header.css'
-import { useAuth } from "react-oidc-context";
+import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { isAdmin } from '../../utils/authUtils';
+import { useNavigate } from 'react-router-dom';
 
 function Header() {
   const auth = useAuth();
+  const navigate = useNavigate();
 
   const handleLogin = () => {
-    auth.signinRedirect();
+    navigate('/auth');
   };
 
   const handleLogout = () => {
-    const clientId = "478qnp7vk39jamq13sl8k4sp7t";
-    const logoutUri = "http://localhost:5173";
-    const cognitoDomain = "https://us-east-1gbsgbtrls.auth.us-east-1.amazoncognito.com";
-    
-    // Primero remover el usuario localmente
-    auth.removeUser();
-    
-    // Luego redirigir al logout de Cognito para cerrar la sesión completamente
-    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+    auth.logout();
   };
 
   return (

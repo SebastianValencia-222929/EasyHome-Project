@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
+const STORAGE_KEY = 'easyhome_auth_user';
+
 const AuthContext = createContext(null);
 
 export const useAuth = () => {
@@ -14,70 +16,90 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // TODO: Implementar verificación de sesión con AWS Amplify
-    // Verificar si hay un usuario autenticado al cargar la app
     checkAuthStatus();
   }, []);
 
   const checkAuthStatus = async () => {
     try {
-      // TODO: Usar Amplify Auth.currentAuthenticatedUser()
-      // const currentUser = await Auth.currentAuthenticatedUser();
-      // const userGroups = currentUser.signInUserSession.accessToken.payload['cognito:groups'];
-      // setUser({ ...currentUser, groups: userGroups });
-      
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setUser(parsed);
+      }
+      setError(null);
       setLoading(false);
-    } catch (error) {
+    } catch (err) {
       setUser(null);
+      setError(err);
       setLoading(false);
     }
   };
 
+  const createUserObject = (profile) => ({
+    profile,
+    groups: profile['cognito:groups'] || [],
+  });
+
   const login = async (email, password) => {
     try {
-      // TODO: Implementar login con Amplify
-      // const user = await Auth.signIn(email, password);
-      // await checkAuthStatus();
-      console.log('Login:', email, password);
-    } catch (error) {
-      console.error('Error en login:', error);
-      throw error;
+      const profile = {
+        email,
+        name: email.split('@')[0],
+        sub: `local-${email}`,
+        phone_number: '',
+        'cognito:groups': ['Clientes'],
+      };
+
+      const userObj = createUserObject(profile);
+      setUser(userObj);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(userObj));
+      setError(null);
+    } catch (err) {
+      console.error('Error en login:', err);
+      throw err;
     }
   };
 
   const loginWithGoogle = async () => {
     try {
-      // TODO: Implementar login con Google usando Amplify
-      // await Auth.federatedSignIn({ provider: 'Google' });
-      // Los usuarios de Google serán asignados al grupo "Clientes"
-      console.log('Login with Google');
-    } catch (error) {
-      console.error('Error en login con Google:', error);
-      throw error;
+      const email = 'user@example.com';
+      const profile = {
+        email,
+        name: 'Usuario Google',
+        sub: `google-${email}`,
+        phone_number: '',
+        'cognito:groups': ['Clientes'],
+      };
+
+      const userObj = createUserObject(profile);
+      setUser(userObj);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(userObj));
+      setError(null);
+    } catch (err) {
+      console.error('Error en login con Google:', err);
+      throw err;
     }
   };
 
   const logout = async () => {
     try {
-      // TODO: Implementar logout con Amplify
-      // await Auth.signOut();
       setUser(null);
-    } catch (error) {
-      console.error('Error en logout:', error);
-      throw error;
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (err) {
+      console.error('Error en logout:', err);
+      throw err;
     }
   };
 
   const register = async (userData) => {
     try {
-      // TODO: Implementar registro con Amplify
-      // await Auth.signUp({ ...userData });
-      console.log('Register:', userData);
-    } catch (error) {
-      console.error('Error en registro:', error);
-      throw error;
+      await login(userData.email, userData.password);
+    } catch (err) {
+      console.error('Error en registro:', err);
+      throw err;
     }
   };
 
@@ -88,22 +110,18 @@ export const AuthProvider = ({ children }) => {
 
   const getUserRole = () => {
     if (!user || !user.groups) return null;
-    
-    // Prioridad de roles según la imagen:
-    // 1. Clientes (incluye usuarios de Google)
-    // 2. Trabajadores
-    // Admin no tiene prioridad especificada
-    
-    if (user.groups.includes('Clientes')) return 'Clientes';
-    if (user.groups.includes('Trabajadores')) return 'Trabajadores';
+
     if (user.groups.includes('Admin')) return 'Admin';
-    
+    if (user.groups.includes('Trabajadores')) return 'Trabajadores';
+    if (user.groups.includes('Clientes')) return 'Clientes';
+
     return null;
   };
 
   const value = {
     user,
     loading,
+    error,
     login,
     loginWithGoogle,
     logout,

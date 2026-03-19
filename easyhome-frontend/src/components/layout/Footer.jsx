@@ -1,18 +1,17 @@
 import '../../assets/styles/Footer.css'
-import { useAuth } from "react-oidc-context";
+import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 
 function Footer() {
   const auth = useAuth();
+  const navigate = useNavigate();
 
   const handleLogin = () => {
-    auth.signinRedirect();
+    navigate('/auth');
   };
   const handleRegister = () => {
-    // URL completa de registro de Cognito
-    const cognitoSignupUrl = 'https://us-east-1gbsgbtrls.auth.us-east-1.amazoncognito.com/signup?client_id=478qnp7vk39jamq13sl8k4sp7t&code_challenge=8MNgRVeZQ4m-jnJljG70KrrwnX2liL7h3m433vYbEH0&code_challenge_method=S256&redirect_uri=http%3A%2F%2Flocalhost%3A5173&response_type=code&scope=email+openid+phone&state=95b01a30d90a47cd8d3e72eb405199b5';
-    // Redirige el navegador a la URL de registro
-    window.location.href = cognitoSignupUrl;
+    navigate('/auth');
     };
 
   return (

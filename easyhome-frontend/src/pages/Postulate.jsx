@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from 'react-oidc-context';
+import { useAuth } from '../contexts/AuthContext';
 import { Button, FormInput, FormSelect, FormTextarea, ServiceCheckboxGroup } from '../components/ui';
 import usePostulacion from '../hooks/usePostulacion';
 import categoryService from '../services/categoryService';

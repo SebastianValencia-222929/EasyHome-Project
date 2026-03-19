@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from 'react-oidc-context'
+import { useAuth } from '../contexts/AuthContext'
 import HeroSection from '../components/features/HeroSection'
 import Categories from '../components/features/Categories'
 import { Button } from '../components/ui'

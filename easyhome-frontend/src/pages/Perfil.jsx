@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "react-oidc-context";
+import { useAuth } from '../contexts/AuthContext';
 import { useUserProfile } from "../hooks/useUserProfile";
 import { useUserCapabilities } from "../hooks/useUserCapabilities";
 import "../assets/styles/Perfil.css";

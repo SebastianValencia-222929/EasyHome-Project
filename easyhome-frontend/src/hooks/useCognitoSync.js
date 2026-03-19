@@ -1,6 +1,6 @@
 // hooks/useCognitoSync.js
 import { useEffect } from 'react';
-import { useAuth } from 'react-oidc-context';
+import { useAuth } from '../contexts/AuthContext';
 
 const API_URL = 'http://localhost:8000';
 

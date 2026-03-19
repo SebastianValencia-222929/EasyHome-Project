@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { useAuth } from 'react-oidc-context';
+import { useAuth } from '../../contexts/AuthContext';
 import { hasAnyRole } from '../../utils/authUtils';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -13,7 +13,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   
   // Si no está autenticado, redirigir al login
   if (!auth.isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/auth" replace />;
   }
   
   // Si se especificaron roles permitidos, verificar

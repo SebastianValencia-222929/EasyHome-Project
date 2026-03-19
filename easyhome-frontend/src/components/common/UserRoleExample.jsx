@@ -1,4 +1,4 @@
-import { useAuth } from 'react-oidc-context';
+import { useAuth } from '../../contexts/AuthContext';
 import { isAdmin, isWorker, isClient, getUserRole, getUserGroups } from '../utils/authUtils';
 
 /**

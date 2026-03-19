@@ -14,7 +14,6 @@ from app.models.property import Publicacion_Servicio, Categoria_Servicio, Imagen
 
 # --- Importaciones de Servicios ---
 from app.services.s3_service import s3_service # Usamos el mismo servicio S3
-from app.services.cognito_service import cognito_service # Servicio de Cognito
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/publicaciones", tags=["Publicaciones de Servicios"])
