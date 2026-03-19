@@ -131,3 +131,18 @@ export const getUserCapabilities = (user) => {
     isAdmin: isAdmin(user),
   };
 };
+
+/**
+ * Obtiene la ruta inicial según el rol principal del usuario.
+ * @param {Object} user - Usuario autenticado
+ * @returns {string}
+ */
+export const getDefaultRouteByRole = (user) => {
+  const role = getUserRole(user);
+
+  if (role === 'Admin') return '/admin/dashboard';
+  if (role === 'Trabajadores') return '/trabajador/dashboard';
+  if (role === 'Clientes') return '/cliente/feed';
+
+  return '/';
+};

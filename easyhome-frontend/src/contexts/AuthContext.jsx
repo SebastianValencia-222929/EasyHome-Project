@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 const STORAGE_KEY = 'easyhome_auth_user';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const AuthContext = createContext(null);
 
@@ -38,9 +39,42 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const createUserObject = (profile) => ({
+  const mapTipoUsuarioToGroup = (tipoUsuario) => {
+    switch (tipoUsuario) {
+      case 'administrador':
+        return 'Admin';
+      case 'proveedor':
+        return 'Trabajadores';
+      case 'cliente':
+      default:
+        return 'Clientes';
+    }
+  };
+
+  const resolveGroupsFromBackend = async (profile) => {
+    try {
+      const email = profile?.email;
+      if (!email) return profile?.['cognito:groups'] || ['Clientes'];
+
+      const encodedEmail = encodeURIComponent(email);
+      const response = await fetch(`${API_URL}/api/v1/auth/user-info/${encodedEmail}`);
+
+      if (!response.ok) {
+        return profile?.['cognito:groups'] || ['Clientes'];
+      }
+
+      const dbUser = await response.json();
+      const groupFromDb = mapTipoUsuarioToGroup(dbUser?.tipo_usuario);
+      return [groupFromDb];
+    } catch (err) {
+      console.error('No se pudo validar rol con backend:', err);
+      return profile?.['cognito:groups'] || ['Clientes'];
+    }
+  };
+
+  const createUserObject = (profile, groups) => ({
     profile,
-    groups: profile['cognito:groups'] || [],
+    groups: groups || profile['cognito:groups'] || [],
   });
 
   const login = async (email, password) => {
@@ -53,10 +87,13 @@ export const AuthProvider = ({ children }) => {
         'cognito:groups': ['Clientes'],
       };
 
-      const userObj = createUserObject(profile);
+      const groups = await resolveGroupsFromBackend(profile);
+      const profileWithRole = { ...profile, 'cognito:groups': groups };
+      const userObj = createUserObject(profileWithRole, groups);
       setUser(userObj);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(userObj));
       setError(null);
+      return userObj;
     } catch (err) {
       console.error('Error en login:', err);
       throw err;
@@ -74,10 +111,13 @@ export const AuthProvider = ({ children }) => {
         'cognito:groups': ['Clientes'],
       };
 
-      const userObj = createUserObject(profile);
+      const groups = await resolveGroupsFromBackend(profile);
+      const profileWithRole = { ...profile, 'cognito:groups': groups };
+      const userObj = createUserObject(profileWithRole, groups);
       setUser(userObj);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(userObj));
       setError(null);
+      return userObj;
     } catch (err) {
       console.error('Error en login con Google:', err);
       throw err;
@@ -96,7 +136,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      await login(userData.email, userData.password);
+      return await login(userData.email, userData.password);
     } catch (err) {
       console.error('Error en registro:', err);
       throw err;

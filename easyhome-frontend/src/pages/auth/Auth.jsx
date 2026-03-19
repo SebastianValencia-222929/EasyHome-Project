@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { getDefaultRouteByRole } from '../../utils/authUtils';
 
 function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -13,8 +14,9 @@ function Auth() {
 
   const handleGoogleLogin = async () => {
     try {
-      await auth.loginWithGoogle();
-        navigate('/');
+      const loggedUser = await auth.loginWithGoogle();
+      const targetRoute = getDefaultRouteByRole(loggedUser);
+      navigate(targetRoute);
     } catch (error) {
       console.error('Error al iniciar sesión con Google:', error);
     }
@@ -35,12 +37,14 @@ function Auth() {
       }
 
       try {
+        let loggedUser;
         if (isLogin) {
-          await auth.login(email, password);
+          loggedUser = await auth.login(email, password);
         } else {
-          await auth.register({ email, password });
+          loggedUser = await auth.register({ email, password });
         }
-        navigate('/');
+        const targetRoute = getDefaultRouteByRole(loggedUser);
+        navigate(targetRoute);
       } catch (err) {
         setError('Error al iniciar sesión.');
         console.error(err);
@@ -67,6 +71,7 @@ function Auth() {
 
       {/* Botón de Google OAuth */}
       <button
+        type="button"
         onClick={handleGoogleLogin}
         style={{
           width: '100%',
@@ -93,7 +98,7 @@ function Auth() {
       </div>
 
       {/* Formulario básico (placeholder para el equipo) */}
-      <form style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <input
           type="email"
           placeholder="Correo electrónico"
@@ -160,6 +165,7 @@ function Auth() {
       <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '14px' }}>
         {isLogin ? '¿No tienes cuenta? ' : '¿Ya tienes cuenta? '}
         <button
+          type="button"
           onClick={() => setIsLogin(!isLogin)}
           style={{
             background: 'none',
