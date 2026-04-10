@@ -1,6 +1,9 @@
-# EasyHome 🏠
+# EasyHome 
 
 **EasyHome** is a home-services marketplace that connects clients with verified service providers (plumbers, carpenters, cleaners, and more). Clients can browse listings, compare prices and reviews, and hire professionals. Workers can publish their services, manage requests, and grow their business through subscription plans.
+
+> [!NOTE]
+> **Deployment Status:** This project was originally architected and deployed using a full-cloud infrastructure on **AWS (EC2, RDS, S3, and Cognito)**. To optimize maintenance costs, the current repository has been configured for **local execution and demonstration**, while preserving the original cloud-native logic and integration hooks.
 
 ---
 
@@ -28,6 +31,32 @@
 | Database  | PostgreSQL (asyncpg driver) |
 | Auth      | AWS Cognito (OIDC / JWT) |
 | Storage   | AWS S3 (local filesystem fallback for development) |
+
+---
+
+---
+
+## Cloud Architecture
+
+Below is the conceptual diagram of the cloud-native infrastructure on AWS (Amazon Web Services) that powers EasyHome. This architecture supports secure authentication, scalable file storage, and asynchronous event-driven notifications.
+
+<p align="center">
+  <a href="./assets/EasyHome-cloud-architecture-diagram.png">
+    <img src="./assets/cloud-architecture-diagram.png" alt="EasyHome AWS Cloud Architecture Diagram" width="800">
+  </a>
+</p>
+
+*Figure 1: High-level overview of the AWS services and user flow.*
+
+---
+
+### Key Architectural Components
+
+* **Security & Auth:** **AWS Cognito** serves as the central identity provider, securing user access and synchronizing profiles with the backend database. All API requests are routed through **Amazon API Gateway** for an added layer of protection.
+* **Application Layer:** The frontend is hosted on **AWS Amplify**, while the **FastAPI** backend runs on a scalable **EC2** instance.
+* **Data & Storage:** User data is persisted in **Amazon RDS**, and all portfolio/profile images are managed via **Amazon S3**.
+* **Asynchronous Notifications:** A decoupled messaging system utilizes **AWS Lambda** to process business events triggered from the database. It leverages **Amazon SNS** for sending email alerts and **End User Messaging** for direct communication channels like WhatsApp.
+* **External Integrations:** The backend integrates with the **Stripe API** for secure payments and subscriptions.
 
 ---
 
@@ -193,25 +222,20 @@ The app will be available at `http://localhost:5173`.
 
 ## Frontend Contributions – Sebastián Valencia
 
-The following sections of the frontend were designed and implemented by **Sebastián Valencia**:
+In this project, I focused on designing and implementing critical UI components and core business logic. My key contributions include:
 
-### Pages & Views
-- **Home (`/`)** – Landing page including the hero section, service categories carousel, *¿Cómo funciona?* step-by-step guide, benefits highlights (Verified Providers, Review System, Best Prices), and the call-to-action section for worker sign-up.
-- **Subscriptions (`/subscriptions`)** – Full subscription plans page featuring pricing cards (Básico, Esencial, Premium), a side-by-side comparison table, and an interactive FAQ accordion.
-- **Advertise (`/advertise`)** – Advertising plans page for businesses, with pricing cards (Rotatorio, Lateral, Superior), a feature comparison table, and FAQ section.
-- **Profile (`/perfil`)** – Unified profile page with role-aware tab navigation: client tabs (Change Data, Contracted Services, Reviews Made) and worker tabs (About Me, My Services, Portfolio, Reviews, Services), plus photo editing modal.
-- **Service Publication Form (`/publicarservicio`)** – Form for workers to publish new service listings.
-- **Postulate (`/postulate`)** – Application flow for clients wishing to become service providers.
+Pages & Views
+Home (/): I developed the complete landing page, including the Hero section, dynamic service category carousel, and the step-by-step "¿Cómo funciona?" guide. I also implemented the benefits highlights and the worker sign-up call-to-action (CTA).
 
-### Components
-- **HeroSection** – Main hero banner on the home page.
-- **Categories** – Dynamic service category grid displayed on the home page.
-- **FAQSection** – Reusable accordion FAQ component used in both Subscriptions and Advertise pages.
-- **PremiumMembers** – Section highlighting premium service providers.
-- **Publicaciones** – Feed of service publication cards.
-- **Filters** – Filter controls for the service feed.
+Subscriptions (/subscriptions): I built the full subscription plans page, featuring interactive pricing cards, a detailed feature comparison table, and a reusable FAQ accordion system.
 
-### Routing & Auth
-- **AppRoutes** – Centralised route definitions with protected routes enforcing role-based access (`Clientes`, `Trabajadores`, `Admin`).
-- **AuthContext** – React context wrapping AWS Cognito OIDC integration for session management across the app.
-- **useCognitoSync** hook – Synchronises the authenticated Cognito user with the backend database on login.
+Advertise (/advertise): I implemented the business advertising views, structuring the pricing tiers (Rotatorio, Lateral, Superior) and feature comparison layouts.
+
+Unified Profile (/perfil): I designed and developed a role-aware profile page that dynamically toggles views for both clients (order history, reviews) and workers (portfolio, service management, and profile photo editing).
+
+Service Forms: I implemented the service publication flow (/publicarservicio) and the onboarding flow for users applying to become service providers (/postulate).
+
+Reusable Components
+UI Architecture: I created modular components such as the HeroSection, a dynamic Categories grid, and a reusable FAQSection designed for cross-page consistency.
+
+Data Display: I developed the PremiumMembers highlight section and the core Publicaciones feed, including integrated Filters for real-time service discovery.
